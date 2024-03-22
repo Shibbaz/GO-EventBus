@@ -1,10 +1,10 @@
 package events
 
-import(
+import (
 	. "types"
 )
 
-type Event struct{
-	Projection Projection
-	Args EventArgs
+type Event struct {
+	Projection any
+	Args       EventArgs
 }

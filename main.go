@@ -1,27 +1,28 @@
 package main
 
-import(
-	"reflect"
-	"fmt"
-	. "store"
+import (
+	. "events"
 	. "examples"
+	"reflect"
+	. "store"
 	. "types"
 )
 
-
-func main(){
+func main() {
 	EventDispatcher := NewEventDispatcher(
-		map[reflect.Type] func(EventArgs)(Status, error){
+		map[reflect.Type]func(EventArgs) (Status, error){
 			reflect.TypeOf(Projection{}): Example,
 		},
-	);
+	)
 	eventStore := EventsStore{
 		Dispatcher: *EventDispatcher,
 	}
-	method := eventStore.GetFunc(Projection{});
-	args := EventArgs{
-		"xd": 1,
-	}
-	fmt.Println(method(args))
-	
+	eventStore.Subscribe(&Event{
+		Projection: *NewProjection(),
+		Args: EventArgs{
+			"1": 1,
+			"2": 2,
+		},
+	})
+	eventStore.Publish()
 }

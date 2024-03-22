@@ -1,14 +1,12 @@
 package examples
 
-import(
+import (
 	"fmt"
 	. "types"
 )
 
-func Example(a EventArgs)(Status, error){
-	fmt.Println(a)
-	return Status{
-		Code: 200,
-		Message: "Successful",
-	},nil
+func Example(a EventArgs) (Status, error) {
+	status := *NewStatus(200, "Succesful")
+	fmt.Printf(" %v %v\n", a, status)
+	return status, nil
 }

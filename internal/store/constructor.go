@@ -1,12 +1,12 @@
 package store
 
-import(
+import (
 	. "events"
 )
 
-func NewEventsStore(dispatcher EventDispatcher) *EventsStore{
+func NewEventsStore(dispatcher EventDispatcher) *EventsStore {
 	return &EventsStore{
-		Events: []Event{},
+		Events:     []Event{},
 		Dispatcher: dispatcher,
 	}
 }

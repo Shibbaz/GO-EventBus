@@ -1,7 +1,15 @@
 package store
 
-func (store *EventsStore) Publish(){
+import (
+	"fmt"
+	"reflect"
+)
+
+func (store *EventsStore) Publish() {
 	for _, event := range store.Events {
-		store.GetFunc(event)(event.Args);
+		fn := store.GetFunc(event.Projection)
+		typeOf := reflect.TypeOf(event.Projection).Name()
+		fmt.Printf("Event type of %s got results", typeOf)
+		fn(event.Args)
 	}
 }

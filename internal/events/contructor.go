@@ -1,11 +1,12 @@
 package events
-import(
+
+import (
 	. "types"
 )
 
-func NewEvent(projection Projection, args EventArgs) *Event{
+func NewEvent(projection any, args EventArgs) *Event {
 	return &Event{
 		Projection: projection,
-		Args: args,
+		Args:       args,
 	}
 }
