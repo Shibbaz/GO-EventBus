@@ -7,4 +7,5 @@ import (
 type Event struct {
 	Projection any
 	Args       EventArgs
+	Status     bool
 }

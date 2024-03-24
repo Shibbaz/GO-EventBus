@@ -1,9 +1,9 @@
 package store
 
-import(
+import (
 	. "events"
 )
 
 func (store *EventsStore) Subscribe(event *Event) {
-	store.Events = append(store.Events, *event);
+	store.Stream = append(store.Stream, *event)
 }

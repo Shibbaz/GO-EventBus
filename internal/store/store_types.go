@@ -1,16 +1,16 @@
 package store
 
-import(
-	. "types"
-	"reflect"
+import (
 	. "events"
+	"reflect"
+	. "types"
 )
 
-type EventsStore struct{
-	Events []Event
+type EventsStore struct {
+	Stream     []Event
 	Dispatcher EventDispatcher
 }
 
-type EventDispatcher struct{
-	EventFunctions map[reflect.Type] func(EventArgs)(Status, error)
+type EventDispatcher struct {
+	EventFunctions map[reflect.Type]func(EventArgs) (Status, error)
 }

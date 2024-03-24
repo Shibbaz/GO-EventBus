@@ -6,7 +6,7 @@ import (
 
 func NewEventsStore(dispatcher EventDispatcher) *EventsStore {
 	return &EventsStore{
-		Events:     []Event{},
+		Stream:     []Event{},
 		Dispatcher: dispatcher,
 	}
 }
