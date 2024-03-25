@@ -1,6 +1,7 @@
-package bus
+package tests
 
 import (
+	. "bus"
 	. "dispatcher"
 	. "events"
 	. "examples"
