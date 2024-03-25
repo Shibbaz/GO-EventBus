@@ -1,11 +1,8 @@
 package events
 
-import (
-	. "types"
-)
+type EventArgs []any
 
 type Event struct {
 	Projection any
-	Args       EventArgs
-	Status     bool
+	EventArgs  EventArgs
 }
