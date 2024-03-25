@@ -6,5 +6,6 @@ use(
     ./internal/dispatcher
     ./internal/examples
     ./internal/bus
+    ./internal/tests
     ./internal/events
 )

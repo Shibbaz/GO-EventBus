@@ -29,7 +29,7 @@ func (bus *Bus) Publish(i int, wg *sync.WaitGroup, mutex *sync.Mutex) {
 
 }
 
-func (bus *Bus) Compose() {
+func (bus *Bus) Compose() error {
 
 	var wg sync.WaitGroup
 	var mutex sync.Mutex
@@ -51,8 +51,9 @@ func (bus *Bus) Compose() {
 		case event := <-bus.Channels[i]:
 			fmt.Printf("Event %d succeded. Receiving data -> '%s'\n", event["id"], event["status"])
 		default:
-			fmt.Printf("No communication ready\n")
+			return fmt.Errorf("no communication ready")
 		}
 		time.Sleep(100 * time.Millisecond)
 	}
+	return nil
 }

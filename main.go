@@ -8,10 +8,6 @@ import (
 	"reflect"
 )
 
-func Example(...any) (Data, error) {
-	return Data{Metadata: "Hello"}, nil
-}
-
 func main() {
 	dispatcher := Dispatcher{
 		reflect.TypeOf(Projection{}): Example,
