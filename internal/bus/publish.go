@@ -4,7 +4,6 @@ import (
 	. "events"
 	"fmt"
 	"sync"
-	"time"
 )
 
 func (bus *Bus) Work(event *Event, i int, wg *sync.WaitGroup, mutex *sync.Mutex) {
@@ -31,7 +30,6 @@ func (bus *Bus) Handle(size int) error {
 		default:
 			return fmt.Errorf("no communication ready")
 		}
-		time.Sleep(100 * time.Millisecond)
 	}
 	return nil
 }
