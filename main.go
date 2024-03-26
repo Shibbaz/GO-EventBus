@@ -18,7 +18,6 @@ func producer(w int, bus *Bus, p chan<- string, mutex *sync.Mutex, wg *sync.Wait
 	mutex.Lock()
 	event := NewEvent(Projection{}, EventArgs{1: w})
 	bus.Subscribe(event)
-	fmt.Printf("Produced by worker %d \n", w)
 	p <- fmt.Sprintf("%d", w)
 }
 
@@ -40,9 +39,11 @@ func main() {
 	var mutex sync.Mutex
 	done := make(chan bool)
 	producerQ := make(chan string)
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 500000; i++ {
 		wg.Add(1)
+
 		go producer(i, bus, producerQ, &mutex, &wg)
+
 	}
 	go consumer(bus, producerQ, done)
 	wg.Wait()
@@ -50,5 +51,5 @@ func main() {
 	close(producerQ)
 	<-done
 	elapsed := time.Since(start)
-	log.Printf("100 000 events took %s", elapsed)
+	log.Printf("500 000 events took %s", elapsed)
 }

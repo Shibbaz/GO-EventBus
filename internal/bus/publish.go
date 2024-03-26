@@ -13,10 +13,9 @@ func (bus *Bus) Work(event *Event, i int, wg *sync.WaitGroup, mutex *sync.Mutex)
 	projection := event.Projection
 	fn := bus.Dispatcher.Get(projection)
 	args := event.EventArgs
-	status, _ := fn(args)
+	fn(args)
 	bus.Channels[i] <- map[string]any{
-		"id":     i,
-		"status": status.Metadata,
+		"id": i,
 	}
 	event.Status = true
 
@@ -25,8 +24,7 @@ func (bus *Bus) Work(event *Event, i int, wg *sync.WaitGroup, mutex *sync.Mutex)
 func (bus *Bus) Handle(size int) error {
 	for i := 0; i < size; i++ {
 		select {
-		case event := <-bus.Channels[i]:
-			fmt.Printf("Event %d succeded. Receiving data -> '%s'\n", event["id"], event["status"])
+		case <-bus.Channels[i]:
 		default:
 			return fmt.Errorf("no communication ready")
 		}
