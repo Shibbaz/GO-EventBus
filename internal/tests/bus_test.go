@@ -17,7 +17,7 @@ func TestPublishBus(t *testing.T) {
 
 	event := NewEvent(Projection{}, EventArgs{1: "1"})
 	bus.Subscribe(event)
-	got := bus.Compose()
+	got := bus.Publish()
 	if !reflect.DeepEqual(nil, got) {
 		t.Fatalf("wanted %v, got %v", nil, got)
 	}

@@ -10,7 +10,7 @@ func NewBus(dispatcher *Dispatcher) *Bus {
 
 	return &Bus{
 		Channels:   channel,
-		Events:     []Event{},
+		Events:     *NewEventList(),
 		Dispatcher: *dispatcher,
 	}
 }

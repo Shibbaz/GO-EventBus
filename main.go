@@ -17,5 +17,13 @@ func main() {
 	event := NewEvent(Projection{}, EventArgs{1: "1"})
 
 	bus.Subscribe(event)
-	bus.Compose()
+	event = NewEvent(Projection{}, EventArgs{2: "2"})
+
+	bus.Subscribe(event)
+	bus.Publish()
+	event = NewEvent(Projection{}, EventArgs{1: "1"})
+
+	bus.Subscribe(event)
+	bus.Publish()
+
 }

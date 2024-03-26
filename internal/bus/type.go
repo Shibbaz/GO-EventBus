@@ -7,6 +7,6 @@ import (
 
 type Bus struct {
 	Channels   map[int](chan map[string]any)
-	Events     []Event
+	Events     EventList
 	Dispatcher Dispatcher
 }

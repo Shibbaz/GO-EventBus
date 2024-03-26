@@ -6,5 +6,4 @@ import (
 
 func (bus *Bus) Subscribe(event *Event) {
 	bus.Events = append(bus.Events, *event)
-
 }
