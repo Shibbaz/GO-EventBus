@@ -22,9 +22,8 @@ func main() {
 		node := make(chan Stream, 1)
 		go func(nodeChan chan Stream, ws *sync.WaitGroup, j int) {
 			event := NewEvent(EventArgs{"id": j, "price": 200000}, HouseWasSold{})
-			data := NewStream(event, j, j)
+			data := NewStream(event, j)
 			defer ws.Done()
-			nodeChan <- data
 			data.Append(nodeChan)
 		}(node, &wg, i)
 
@@ -33,5 +32,5 @@ func main() {
 
 	}
 	elapsed := time.Since(start)
-	fmt.Printf("Elapsed time: %s", elapsed)
+	fmt.Printf("Elapsed time: %s\n", elapsed)
 }

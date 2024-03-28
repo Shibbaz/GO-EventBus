@@ -4,7 +4,7 @@ import (
 	. "events"
 )
 
-func NewStream(event Event, value int, id int) Stream {
+func NewStream(event Event, id int) Stream {
 	channel := make(chan Stream)
 	data := Stream{
 		Id:    id,
