@@ -24,18 +24,19 @@ func Subscribe(events chan []Event, wg *sync.WaitGroup, mutex *sync.Mutex) {
 	defer wg.Done()
 	defer mutex.Unlock()
 	mutex.Lock()
-	batchevents := []Event{}
+	store := NewStore()
+
 	wp := sync.WaitGroup{}
 	for j := 0; j < ProcessNum; j++ {
 		wp.Add(1)
 		go func() {
 			defer wp.Done()
 			event := NewEvent(ExampleEvent{}, EventArgs{1: 1})
-			batchevents = append(batchevents, event)
+			store.Subscribe(event)
 		}()
 		wp.Wait()
 	}
-	events <- batchevents
+	events <- store.Events
 }
 
 func Publish(event <-chan []Event, wg *sync.WaitGroup, mutex *sync.Mutex) {

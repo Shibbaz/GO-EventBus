@@ -5,17 +5,17 @@ import (
 )
 
 func (batch Batch) Push(events []Event, batchSize int) Batch {
-	batchedEvents := []Event{}
+	store := NewStore()
 	for loop := true; loop; {
 		for _, event := range events {
-			batchedEvents = append(batchedEvents, event)
-			if len(batchedEvents) == batchSize {
-				batch = append(batch, batchedEvents)
-				batchedEvents = []Event{}
+			store.Subscribe(event)
+			if len(store.Events) == batchSize {
+				batch = append(batch, store.Events)
+				store.Reset()
 				continue
 			}
 		}
-		batch = append(batch, batchedEvents)
+		batch = append(batch, store.Events)
 
 		loop = false
 	}
