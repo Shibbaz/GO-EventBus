@@ -1,3 +1,3 @@
-module github.com/Shibbaz/GO-EventBus/pkg/examples
+module examples
 
 go 1.22.1

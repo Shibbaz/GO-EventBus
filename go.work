@@ -2,8 +2,10 @@ go 1.22.1
 
 use (
 	.
-	./pkg/batch
+	./pkg
+	./pkg/stream
+	./pkg/dispatcher
 	./pkg/events
 	./pkg/examples
-	./pkg/helpers
+	./pkg/store
 )
