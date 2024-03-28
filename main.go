@@ -1,35 +1,37 @@
 package main
 
 import (
-	"log"
+	. "events"
+	. "examples"
+	"fmt"
+	. "store"
+	. "stream"
 	"sync"
 	"time"
-
-	. "github.com/Shibbaz/GO-EventBus/pkg/helpers"
-
-	. "github.com/Shibbaz/GO-EventBus/pkg/examples"
 )
 
 func main() {
+	var wg sync.WaitGroup
 	start := time.Now()
-
-	events := make(Bus, ProcessNum)
-	wp := sync.WaitGroup{}
-	mutex := sync.Mutex{}
-
-	wc := sync.WaitGroup{}
-	cmutex := sync.Mutex{}
-
-	for i := 0; i < ProcessNum; i++ {
-		wp.Add(1)
-		go Subscribe(events, &wp, &mutex)
-		wc.Add(1)
-		go Publish(events, &wc, &cmutex)
+	const SERVER_NUM = 200000
+	store := Store{
+		Dispatcher: &EventsDispatcher,
 	}
-	wp.Wait()
-	wc.Wait()
-	close(events)
+	for i := 0; i < SERVER_NUM; i++ {
+		wg.Add(1)
+		node := make(chan Stream, 1)
+		go func(nodeChan chan Stream, ws *sync.WaitGroup, j int) {
+			event := NewEvent(EventArgs{"id": j, "price": 200000}, HouseWasSold{})
+			data := NewStream(event, j, j)
+			defer ws.Done()
+			nodeChan <- data
+			data.Append(nodeChan)
+		}(node, &wg, i)
 
+		wg.Wait()
+		store.Send(node)
+
+	}
 	elapsed := time.Since(start)
-	log.Printf("1000000 events took %s", elapsed)
+	fmt.Printf("Elapsed time: %s", elapsed)
 }
