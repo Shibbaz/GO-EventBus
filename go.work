@@ -1,10 +1,9 @@
 go 1.22.1
 
-use(
-    .
-    ./internal
-    ./internal/examples
-    ./internal/events
-    ./internal/batch
-    ./internal/helpers
+use (
+	.
+	./pkg/batch
+	./pkg/events
+	./pkg/examples
+	./pkg/helpers
 )

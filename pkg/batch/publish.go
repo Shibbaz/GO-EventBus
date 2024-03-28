@@ -1,7 +1,7 @@
 package batch
 
 import (
-	. "github.com/Shibbaz/GO-EventBus/internal/events"
+	. "github.com/Shibbaz/GO-EventBus/pkg/events"
 )
 
 func (batch *Batch) Publish(events *[]Event, batchSize int, dispatcher *Dispatcher) {

@@ -1,13 +1,13 @@
 package examples
 
 import (
-	. "github.com/Shibbaz/GO-EventBus/internal/batch"
+	. "github.com/Shibbaz/GO-EventBus/pkg/batch"
 
-	. "github.com/Shibbaz/GO-EventBus/internal/events"
+	. "github.com/Shibbaz/GO-EventBus/pkg/events"
 
 	"fmt"
 
-	. "github.com/Shibbaz/GO-EventBus/internal/helpers"
+	. "github.com/Shibbaz/GO-EventBus/pkg/helpers"
 
 	"reflect"
 	"sync"

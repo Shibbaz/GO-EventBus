@@ -1,7 +1,7 @@
 package helpers
 
 import (
-	. "github.com/Shibbaz/GO-EventBus/internal/events"
+	. "github.com/Shibbaz/GO-EventBus/pkg/events"
 )
 
 var BatchSize = 100

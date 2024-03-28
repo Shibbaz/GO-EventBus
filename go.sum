@@ -1,8 +1,0 @@
-github.com/Shibbaz/GO-EventBus/internal/batch v0.0.0-20240328013248-7389ccc1cdf2 h1:PxgaKX8/LjNzatDU0RbgJQ1Ed0QpHfyliaiUGuKLI5U=
-github.com/Shibbaz/GO-EventBus/internal/batch v0.0.0-20240328013248-7389ccc1cdf2/go.mod h1:lIBKb/Xaj/PGTHaF9o1G0SobT8XHEjEyadEnpNvASRM=
-github.com/Shibbaz/GO-EventBus/internal/events v0.0.0-20240328013248-7389ccc1cdf2 h1:qQDonCjJZD9LK5ddbDIHAISV7yn5vquh9tBsXSxXXLY=
-github.com/Shibbaz/GO-EventBus/internal/events v0.0.0-20240328013248-7389ccc1cdf2/go.mod h1:DmihU9Uk4NUBGCEDo945SRFZ5WixbxYK3tUdu4AU7gA=
-github.com/Shibbaz/GO-EventBus/internal/examples v0.0.0-20240328013248-7389ccc1cdf2 h1:6psqJcmAXx4O43VkNS925I09Am9+Z76uHVUnovaQiZQ=
-github.com/Shibbaz/GO-EventBus/internal/examples v0.0.0-20240328013248-7389ccc1cdf2/go.mod h1:s+7B4JpWw2HKbI677tDF53Ik21OFpa32u6ADqMd+dkc=
-github.com/Shibbaz/GO-EventBus/internal/helpers v0.0.0-20240328013248-7389ccc1cdf2 h1:392Tl83w9yA4XUGA/PAjCRPG8kUwT/7+Y9Jtz/FzBFE=
-github.com/Shibbaz/GO-EventBus/internal/helpers v0.0.0-20240328013248-7389ccc1cdf2/go.mod h1:3k2tJ5HxlhnyHUXpcQgKHeNR1q5hrqv8gbJxMPaVDw0=

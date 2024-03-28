@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
-	. "github.com/Shibbaz/GO-EventBus/internal/helpers"
+	. "github.com/Shibbaz/GO-EventBus/pkg/helpers"
 
-	. "github.com/Shibbaz/GO-EventBus/internal/examples"
+	. "github.com/Shibbaz/GO-EventBus/pkg/examples"
 )
 
 func main() {
