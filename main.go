@@ -1,21 +1,35 @@
 package main
 
 import (
-	. "bus"
-	. "dispatcher"
-	. "events"
-	. "examples"
-	"reflect"
+	"log"
+	"sync"
+	"time"
+
+	. "github.com/Shibbaz/GO-EventBus/internal/helpers"
+
+	. "github.com/Shibbaz/GO-EventBus/internal/examples"
 )
 
 func main() {
-	dispatcher := Dispatcher{
-		reflect.TypeOf(Projection{}): Example,
+	start := time.Now()
+
+	events := make(Bus, ProcessNum)
+	wp := sync.WaitGroup{}
+	mutex := sync.Mutex{}
+
+	wc := sync.WaitGroup{}
+	cmutex := sync.Mutex{}
+
+	for i := 0; i < ProcessNum; i++ {
+		wp.Add(1)
+		go Subscribe(events, &wp, &mutex)
+		wc.Add(1)
+		go Publish(events, &wc, &cmutex)
 	}
-	bus := NewBus(&dispatcher)
+	wp.Wait()
+	wc.Wait()
+	close(events)
 
-	event := NewEvent(Projection{}, EventArgs{1: "1"})
-
-	bus.Subscribe(event)
-	bus.Compose()
+	elapsed := time.Since(start)
+	log.Printf("1000000 events took %s", elapsed)
 }
