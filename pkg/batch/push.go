@@ -6,19 +6,15 @@ import (
 
 func (batch Batch) Push(events []Event, batchSize int) Batch {
 	store := NewStore()
-	for loop := true; loop; {
-		for _, event := range events {
-			store.Subscribe(event)
-			if len(store.Events) == batchSize {
-				batch = append(batch, store.Events)
-				store.Reset()
-				continue
-			}
+	// add go routine to fasten the process
+	for _, event := range events {
+		store.Subscribe(event)
+		if len(store.Events) == batchSize {
+			batch = append(batch, store.Events)
+			store.Reset()
+			continue
 		}
-		batch = append(batch, store.Events)
-
-		loop = false
 	}
-
+	batch = append(batch, store.Events)
 	return batch
 }
