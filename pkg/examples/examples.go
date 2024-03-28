@@ -24,30 +24,37 @@ func Example(args EventArgs) error {
 
 type ExampleEvent struct{}
 
-func Subscribe(events chan []Event, wg *sync.WaitGroup, mutex *sync.Mutex) {
-	defer wg.Done()
-	defer mutex.Unlock()
-	mutex.Lock()
+func EventsProducer() []Event {
 	store := NewStore()
 
 	wp := sync.WaitGroup{}
-	for j := 0; j < ProcessNum; j++ {
+	for job := 0; job < ProcessNum; job++ {
 		wp.Add(1)
-		go func() {
-			defer wp.Done()
+		go func(wg *sync.WaitGroup) {
+			defer wg.Done()
 			event := NewEvent(ExampleEvent{}, EventArgs{1: 1})
 			store.Subscribe(event)
-		}()
+		}(&wp)
 		wp.Wait()
 	}
-	events <- store.Events
+	return store.Events
 }
 
-func Publish(event <-chan []Event, wg *sync.WaitGroup, mutex *sync.Mutex) {
+func Subscribe(eventsChannels chan []Event, wg *sync.WaitGroup, mutex *sync.Mutex) {
 	defer wg.Done()
 	defer mutex.Unlock()
 	mutex.Lock()
-	events := <-event
+	var ws sync.WaitGroup
+	ws.Add(1)
+	go func(ws *sync.WaitGroup) {
+		defer ws.Done()
+		eventsChannels <- EventsProducer()
+	}(&ws)
+	ws.Wait()
+}
+
+func Publish(event chan []Event, wg *sync.WaitGroup, mutex *sync.Mutex) {
+	defer wg.Done()
 	batch := Batch{}
-	batch.Publish(&events, BatchSize, &EventsDispatcher)
+	batch.Publish(event, BatchSize, &EventsDispatcher)
 }
