@@ -10,6 +10,12 @@ func NewStore() *Store {
 	}
 }
 
+func (store *Store) Publish(dispatcher *Dispatcher) {
+	for _, event := range store.Events {
+		event.Exec(dispatcher)
+	}
+}
+
 func (store *Store) Subscribe(event Event) {
 	store.Events = append(store.Events, event)
 }
