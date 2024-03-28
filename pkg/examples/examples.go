@@ -53,8 +53,9 @@ func Subscribe(eventsChannels chan []Event, wg *sync.WaitGroup, mutex *sync.Mute
 	ws.Wait()
 }
 
-func Publish(event chan []Event, wg *sync.WaitGroup, mutex *sync.Mutex) {
+func Publish(eventsChannels chan []Event, wg *sync.WaitGroup, mutex *sync.Mutex) {
 	defer wg.Done()
 	batch := Batch{}
-	batch.Publish(event, BatchSize, &EventsDispatcher)
+	events := <-eventsChannels
+	batch.Publish(&events, BatchSize, &EventsDispatcher)
 }

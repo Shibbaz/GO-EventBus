@@ -4,10 +4,10 @@ import (
 	. "github.com/Shibbaz/GO-EventBus/pkg/events"
 )
 
-func (batch Batch) Push(events chan []Event, batchSize int) Batch {
+func (batch Batch) Push(events *[]Event, batchSize int) Batch {
 	store := NewStore()
 	// add go routine to fasten the process
-	for _, event := range <-events {
+	for _, event := range *events {
 		store.Subscribe(event)
 		if len(store.Events) == batchSize {
 			batch = append(batch, store.Events)

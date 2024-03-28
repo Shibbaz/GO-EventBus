@@ -4,7 +4,7 @@ import (
 	. "github.com/Shibbaz/GO-EventBus/pkg/events"
 )
 
-func (batch *Batch) Publish(data chan []Event, batchSize int, dispatcher *Dispatcher) {
+func (batch *Batch) Publish(data *[]Event, batchSize int, dispatcher *Dispatcher) {
 	batches := batch.Push(data, batchSize)
 	for _, events := range batches {
 		for _, event := range events {
