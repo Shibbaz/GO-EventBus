@@ -1,23 +1,14 @@
 package events
 
-type EventArgs []any
-
+type EventArgs map[int]any
 type Event struct {
 	Projection any
-	EventArgs  EventArgs
-	Status     bool
+	Args       EventArgs
 }
 
-type EventList []Event
-
-func NewEvent(projection any, args EventArgs) *Event {
-	return &Event{
+func NewEvent(projection any, args EventArgs) Event {
+	return Event{
 		Projection: projection,
-		EventArgs:  args,
-		Status:     false,
+		Args:       args,
 	}
-}
-
-func NewEventList() *EventList {
-	return &EventList{}
 }
