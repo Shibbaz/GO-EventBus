@@ -10,6 +10,20 @@ import (
 	"time"
 )
 
+func EventLoop(wg sync.WaitGroup, store *Store, index int) {
+	wg.Add(1)
+	node := make(chan Stream, 1)
+	go func(nodeChan chan Stream, ws *sync.WaitGroup, j int) {
+		event := NewEvent(EventArgs{"id": j, "price": 200000}, HouseWasSold{})
+		data := NewStream(event, j)
+		defer ws.Done()
+		data.Append(nodeChan)
+	}(node, &wg, index)
+	store.Send(node)
+	wg.Wait()
+	close(node)
+}
+
 func main() {
 	var wg sync.WaitGroup
 	start := time.Now()
@@ -18,20 +32,11 @@ func main() {
 		Dispatcher: &EventsDispatcher,
 	}
 	for i := 0; i < SERVER_NUM; i++ {
-		wg.Add(1)
-		node := make(chan Stream, 1)
-		go func(nodeChan chan Stream, ws *sync.WaitGroup, j int) {
-			event := NewEvent(EventArgs{"id": j, "price": 200000}, HouseWasSold{})
-			data := NewStream(event, j)
-			defer ws.Done()
-			data.Append(nodeChan)
-		}(node, &wg, i)
-		store.Send(node)
-		wg.Wait()
-		close(node)
-
+		EventLoop(wg, &store, i)
 	}
 
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
+	time.Sleep(200 * time.Millisecond)
+
 }
