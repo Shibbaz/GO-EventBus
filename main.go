@@ -28,6 +28,8 @@ func main() {
 		}(node, &wg, i)
 		store.Send(node)
 		wg.Wait()
+		close(node)
+
 	}
 
 	elapsed := time.Since(start)
