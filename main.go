@@ -13,7 +13,7 @@ import (
 func main() {
 	var wg sync.WaitGroup
 	start := time.Now()
-	const SERVER_NUM = 100
+	const SERVER_NUM = 100000
 	store := Store{
 		Dispatcher: &EventsDispatcher,
 	}
@@ -23,9 +23,8 @@ func main() {
 		wg.Add(1)
 		event := NewEvent(EventArgs{"id": i, "price": 200000}, HouseWasSold{})
 		node = store.Publish(node, &wg, event, i)
-		wg.Wait()
-
 	}
+	wg.Wait()
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
 	time.Sleep(200 * time.Millisecond)

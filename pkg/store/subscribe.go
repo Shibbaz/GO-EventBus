@@ -7,8 +7,9 @@ import (
 )
 
 func (store *Store) Publish(node chan Stream, wg *sync.WaitGroup, event Event, index int) chan Stream {
-	go Subscribe(node, event, wg, index)
 	store.Send(node)
+
+	go Subscribe(node, event, wg, index)
 	wg.Wait()
 	return node
 }
