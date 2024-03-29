@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func EventLoop(wg sync.WaitGroup, store *Store, index int) {
+func Setup(wg sync.WaitGroup, store *Store, index int) {
 	wg.Add(1)
 	node := make(chan Stream, 1)
 	go func(nodeChan chan Stream, ws *sync.WaitGroup, j int) {
@@ -32,7 +32,7 @@ func main() {
 		Dispatcher: &EventsDispatcher,
 	}
 	for i := 0; i < SERVER_NUM; i++ {
-		EventLoop(wg, &store, i)
+		go Setup(wg, &store, i)
 	}
 
 	elapsed := time.Since(start)
