@@ -13,7 +13,7 @@ import (
 func main() {
 	var wg sync.WaitGroup
 	start := time.Now()
-	const SERVER_NUM = 200000
+	const SERVER_NUM = 100000
 	store := Store{
 		Dispatcher: &EventsDispatcher,
 	}
@@ -26,11 +26,10 @@ func main() {
 			defer ws.Done()
 			data.Append(nodeChan)
 		}(node, &wg, i)
-
-		wg.Wait()
 		store.Send(node)
-
+		wg.Wait()
 	}
+
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
 }
