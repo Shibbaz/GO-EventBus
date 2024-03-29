@@ -6,8 +6,8 @@ import (
 )
 
 func (store *Store) Send(data chan Stream) {
-	go func() {
-		for node := range data {
+	go func(d chan Stream) {
+		for node := range d {
 			var wg sync.WaitGroup
 
 			for i := 0; i < len(node.Nodes); i++ {
@@ -22,5 +22,5 @@ func (store *Store) Send(data chan Stream) {
 			wg.Wait()
 
 		}
-	}()
+	}(data)
 }

@@ -6,12 +6,11 @@ import (
 	"sync"
 )
 
-func (store *Store) Publish(wg *sync.WaitGroup, event Event, index int) {
-	node := make(chan Stream, 1)
+func (store *Store) Publish(node chan Stream, wg *sync.WaitGroup, event Event, index int) chan Stream {
 	go Subscribe(node, event, wg, index)
 	store.Send(node)
 	wg.Wait()
-	close(node)
+	return node
 }
 
 func Subscribe(nodeChan chan Stream, event Event, ws *sync.WaitGroup, j int) {
