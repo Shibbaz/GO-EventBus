@@ -12,8 +12,16 @@ import (
 	"github.com/ortuman/nuke"
 )
 
+func loop(i int, nodeRef chan Stream, wg *sync.WaitGroup, store *Store) {
+	defer wg.Done()
+	var wst sync.WaitGroup
+	wst.Add(1)
+	event := NewEvent(EventArgs{"id": i, "price": 200000}, HouseWasSold{})
+	store.Publish(nodeRef, &wst, event, i)
+}
+
 func main() {
-	arena := nuke.NewMonotonicArena(512*1024, 80)
+	arena := nuke.NewMonotonicArena(100*1024, 80)
 
 	defer arena.Reset(true)
 	var wg sync.WaitGroup
@@ -22,18 +30,15 @@ func main() {
 	store := Store{
 		Dispatcher: &EventsDispatcher,
 	}
-	chanSlice := nuke.MakeSlice[chan Stream](arena, 0, SERVER_NUM)
 
 	nodeRef := nuke.New[chan Stream](arena)
 	*nodeRef = make(chan Stream)
 	for i := 0; i < SERVER_NUM; i++ {
 		wg.Add(1)
-		event := NewEvent(EventArgs{"id": i, "price": 200000}, HouseWasSold{})
-		*nodeRef = store.Publish(*nodeRef, &wg, event, i)
-		chanSlice = nuke.SliceAppend(arena, chanSlice, *nodeRef)
+		go loop(i, *nodeRef, &wg, &store)
 	}
 	wg.Wait()
+	close(*nodeRef)
 	elapsed := time.Since(start)
 	fmt.Printf("Elapsed time: %s\n", elapsed)
-	time.Sleep(200 * time.Millisecond)
 }
