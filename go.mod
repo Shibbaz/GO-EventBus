@@ -1,8 +1,5 @@
-module main
+module github.com/Shibbaz/GOEventBus
 
 go 1.22.1
 
-require (
-	github.com/gorilla/mux v1.8.1 // indirect
-	github.com/ortuman/nuke v1.3.0 // indirect
-)
+require github.com/ortuman/nuke v1.3.0
