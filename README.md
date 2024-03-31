@@ -11,10 +11,18 @@ You can publish event just by
 	```
 	type HousewasSold struct{}
 	```
+- create func
+	```
+ 	func SellHouse(args EventArgs) error{
+		fmt.Printf("House was solde for %d usd", args["price"])
+ 		return nil
+ 	}
+	```
+
 - create dispatcher
 	```
 	dispatcher := &bus.Dispatcher{
-		reflect.TypeOf(bus.HouseWasSold{}): bus.Example,
+		reflect.TypeOf(bus.HouseWasSold{}): SellHouse,
 	}
 	```
 
