@@ -8,6 +8,7 @@ import (
 	"github.com/ortuman/nuke"
 )
 
+// Store has its own arena, pointer to Event, batchSize
 type Store struct {
 	dispatcher *Dispatcher
 	arena      nuke.Arena
@@ -16,6 +17,7 @@ type Store struct {
 	batchSize  int
 }
 
+// Store appends event to []Event
 func (store *Store) Subscribe(event Event) Store {
 	var mutex sync.Mutex
 	mutex.Lock()
@@ -24,6 +26,7 @@ func (store *Store) Subscribe(event Event) Store {
 	return *store
 }
 
+// Store recognizes events' action by projection type
 func (store *Store) Publish(event *Event) error {
 	t := reflect.TypeOf(event.projection)
 	fn := (*(store.dispatcher))
@@ -37,6 +40,7 @@ func (store *Store) Publish(event *Event) error {
 	return nil
 }
 
+// Store broadcasts all events in the Store
 func (store *Store) Broadcast() {
 	defer store.arena.Reset(true)
 	for _, event := range *store.events {
