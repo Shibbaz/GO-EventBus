@@ -29,9 +29,7 @@ func newEventStore() *EventStore {
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
-				URLs: []string{
-					"stun:127.0.0.1:3478",
-				},
+				URLs: []string{"stun:stun.l.google.com:19302"},
 			},
 		},
 	}
@@ -51,8 +49,8 @@ func newEventStore() *EventStore {
 
 type HouseWasSold struct{}
 
-func (eventstore *EventStore) Publish(channel string) *webrtc.DataChannel {
-	dc, err := eventstore.connection.CreateDataChannel("data", nil)
+func (eventstore *EventStore) Publish(channel string, event *Event) *webrtc.DataChannel {
+	dc, err := eventstore.connection.CreateDataChannel(channel, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -64,39 +62,42 @@ func (eventstore *EventStore) Publish(channel string) *webrtc.DataChannel {
 		fmt.Printf("ICE Connection State has changed: %s\n", connectionState.String()) //nolint
 	})
 
-	dc.OnOpen(func() {
-		log.Println("Event sourcing was initialized")
-		if err != nil {
-			panic(err)
-		}
-	})
-	dc.OnMessage(func(msg webrtc.DataChannelMessage) {
-		err := dec.Decode(&result)
-		if err != nil {
-			panic(err)
-		}
-		log.Printf("Message ([]byte) from DataChannel '%s' with length %d\n", dc.Label())
+	eventstore.connection.OnDataChannel(func(d *webrtc.DataChannel) {
+		fmt.Printf("New DataChannel %s %d\n", d.Label(), d.ID())
 
+		dc.OnOpen(func() {
+			log.Println("Event sourcing was initialized")
+			enc := gob.NewEncoder(&buffer)
+			err := enc.Encode(event)
+			if err != nil {
+				panic(err)
+			}
+			dc.Send(buffer.Bytes())
+		})
+		dc.OnMessage(func(msg webrtc.DataChannelMessage) {
+			err := dec.Decode(&result)
+			if err != nil {
+				panic(err)
+			}
+			log.Printf("Event %d was published\n", result.Id)
+
+		})
 	})
 	return dc
 }
 
 func main() {
 	store := newEventStore()
-
-	dc := store.Publish("event")
 	event := &Event{
 		Id:         "1",
 		Projection: "HouseWasSold",
 		Args:       map[string]any{"price": 100},
 	}
-	buffer := bytes.Buffer{}
-	enc := gob.NewEncoder(&buffer)
-	err := enc.Encode(event)
-	if err != nil {
-		panic(err)
-	}
-	err = dc.Send(buffer.Bytes())
+	dc := store.Publish("event", event)
+
+	state := dc.ReadyState()
+	fmt.Println(state)
+	err := dc.Send([]byte{})
 	if err != nil {
 		panic(err)
 	}
