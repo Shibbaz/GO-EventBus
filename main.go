@@ -5,15 +5,14 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log"
-	"reflect"
 
 	"github.com/pion/webrtc/v2"
 )
 
 type Event struct {
-	id         string
-	projection reflect.Type
-	args       map[string]any
+	Id         string
+	Projection string
+	Args       map[string]any
 }
 
 type EventStoreListener struct {
@@ -30,7 +29,9 @@ func newEventStore() *EventStore {
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
-				URLs: []string{"stun:stun.l.google.com:19302"},
+				URLs: []string{
+					"stun:127.0.0.1:3478",
+				},
 			},
 		},
 	}
@@ -50,85 +51,53 @@ func newEventStore() *EventStore {
 
 type HouseWasSold struct{}
 
-func (eventstore *EventStore) Publish(event *Event, channel string) {
-	ordered := false
-	maxRetransmits := uint16(0)
-
-	options := &webrtc.DataChannelInit{
-		Ordered:        &ordered,
-		MaxRetransmits: &maxRetransmits,
-	}
-
-	dc, err := eventstore.connection.CreateDataChannel(channel, options)
+func (eventstore *EventStore) Publish(channel string) *webrtc.DataChannel {
+	dc, err := eventstore.connection.CreateDataChannel("data", nil)
 	if err != nil {
 		panic(err)
 	}
+	var result Event
+
 	var buffer bytes.Buffer
-	enc := gob.NewEncoder(&buffer)
 	dec := gob.NewDecoder(&buffer)
-	eventstore.connection.OnDataChannel(func(d *webrtc.DataChannel) {
-
-		dc.OnOpen(func() {
-			log.Println("Event of type HouseWasSold was sent")
-			err := enc.Encode(event)
-			if err != nil {
-				log.Fatal("encode error:", err)
-			}
-			err = dc.Send(buffer.Bytes())
-			if err != nil {
-				panic(err)
-			}
-		})
-		var ev Event
-		dc.OnMessage(func(msg webrtc.DataChannelMessage) {
-			err := dec.Decode(&ev)
-			if err != nil {
-				panic(err)
-			}
-			log.Printf("Message ([]byte) from DataChannel '%s' with length %d\n", dc.Label())
-
-		})
+	eventstore.connection.OnICEConnectionStateChange(func(connectionState webrtc.ICEConnectionState) {
+		fmt.Printf("ICE Connection State has changed: %s\n", connectionState.String()) //nolint
 	})
 
-	fmt.Println(dc.ReadyState())
+	dc.OnOpen(func() {
+		log.Println("Event sourcing was initialized")
+		if err != nil {
+			panic(err)
+		}
+	})
+	dc.OnMessage(func(msg webrtc.DataChannelMessage) {
+		err := dec.Decode(&result)
+		if err != nil {
+			panic(err)
+		}
+		log.Printf("Message ([]byte) from DataChannel '%s' with length %d\n", dc.Label())
 
-	// Send a message over the data channel
-	message := []byte("Hello, world!")
-	if err := dc.Send(message); err != nil {
-		log.Fatal(err)
-	}
-
-	// Close the connection when the program is finished
-	defer eventstore.connection.Close()
-
-	eventstore.dataChs[dc.Label()] = dc
-
-	offer, err := eventstore.connection.CreateOffer(nil)
-	if err != nil {
-		panic(err)
-	}
-
-	eventstore.connection.SetLocalDescription(offer)
-
-	go func() {
-		eventstore.listener.OnEvent <- *event
-	}()
+	})
+	return dc
 }
 
 func main() {
 	store := newEventStore()
 
-	store.Publish(&Event{
-		id:         "1",
-		projection: reflect.TypeOf(HouseWasSold{}),
-		args:       map[string]any{"price": 100},
-	}, "hello")
-	for {
-		// Block forever
-		select {
-		case event := <-store.listener.OnEvent:
-			fmt.Printf("event id %s of type %s was published", event.id, event.projection.Name())
-		case <-store.listener.done:
-		}
+	dc := store.Publish("event")
+	event := &Event{
+		Id:         "1",
+		Projection: "HouseWasSold",
+		Args:       map[string]any{"price": 100},
+	}
+	buffer := bytes.Buffer{}
+	enc := gob.NewEncoder(&buffer)
+	err := enc.Encode(event)
+	if err != nil {
+		panic(err)
+	}
+	err = dc.Send(buffer.Bytes())
+	if err != nil {
+		panic(err)
 	}
 }
