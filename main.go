@@ -3,102 +3,174 @@ package main
 import (
 	"bytes"
 	"encoding/gob"
+	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
 
+	"github.com/google/uuid"
 	"github.com/pion/webrtc/v2"
 )
 
 type Event struct {
 	Id         string
-	Projection string
+	Projection any
 	Args       map[string]any
 }
 
-type EventStoreListener struct {
-	OnEvent chan Event
-	done    chan bool
-}
-type EventStore struct {
-	connection *webrtc.PeerConnection
-	listener   EventStoreListener
-	dataChs    map[string]*webrtc.DataChannel
+func newEvent(projection any, args map[string]any) Event {
+	id := uuid.New().String()
+	return Event{
+		Id:         id,
+		Projection: reflect.TypeOf(projection).String(),
+		Args:       args,
+	}
 }
 
-func newEventStore() *EventStore {
+type Dispatcher map[string]func(map[string]any)
+
+type EventStore struct {
+	dispatcher    Dispatcher
+	OnDescription chan string
+	OnBye         chan bool
+
+	pc *webrtc.PeerConnection
+}
+
+func newEventStore(dispatcher Dispatcher) *EventStore {
 	config := webrtc.Configuration{
-		ICEServers: []webrtc.ICEServer{
-			{
-				URLs: []string{"stun:stun.l.google.com:19302"},
-			},
-		},
+		ICEServers: []webrtc.ICEServer{},
 	}
-	connection, err := webrtc.NewPeerConnection(config)
+
+	pc, err := webrtc.NewPeerConnection(config)
 	if err != nil {
 		panic(err)
 	}
 	return &EventStore{
-		connection: connection,
-		listener: EventStoreListener{
-			OnEvent: make(chan Event),
-			done:    make(chan bool),
-		},
-		dataChs: map[string]*webrtc.DataChannel{},
+		dispatcher:    dispatcher,
+		OnDescription: make(chan string),
+		pc:            pc,
 	}
+}
+
+func (eventstore *EventStore) Subscriber(event Event, channel string) {
+	ordered := false
+	maxRetransmits := uint16(0)
+	var buffer bytes.Buffer
+	enc := gob.NewEncoder(&buffer)
+	options := &webrtc.DataChannelInit{
+		Ordered:        &ordered,
+		MaxRetransmits: &maxRetransmits,
+	}
+	dc, err := eventstore.pc.CreateDataChannel(channel, options)
+	if err != nil {
+		panic(err)
+	}
+	dc.OnOpen(func() {
+		log.Printf("Channel %s was opened", dc.Label())
+		err := enc.Encode(event)
+		if err != nil {
+			panic(err)
+		}
+		dc.Send(buffer.Bytes())
+	})
+	dc.OnMessage(func(msg webrtc.DataChannelMessage) {
+		log.Println("Successful")
+	})
+	offer, err := eventstore.pc.CreateOffer(nil)
+	if err != nil {
+		panic(err)
+	}
+
+	eventstore.pc.SetLocalDescription(offer)
+	desc, err := json.Marshal(offer)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		eventstore.OnDescription <- string(desc)
+	}()
+}
+
+func (eventstore *EventStore) Publish(event string) {
+	var desc webrtc.SessionDescription
+	dbyte := []byte(event)
+	err := json.Unmarshal(dbyte, &desc)
+	if err != nil {
+		panic(err)
+	}
+
+	// Apply the desc as the remote description
+	err = eventstore.pc.SetRemoteDescription(desc)
+	if err != nil {
+		panic(err)
+	}
+
+	// Set callback for new data channels
+	eventstore.pc.OnDataChannel(func(dc *webrtc.DataChannel) {
+		// Register channel opening handling
+		dc.OnOpen(func() {})
+
+		// Register the OnMessage to handle incoming messages
+		dc.OnMessage(func(dcMsg webrtc.DataChannelMessage) {
+			go func(msg webrtc.DataChannelMessage) {
+				var result Event
+				buffer := bytes.NewBuffer(msg.Data)
+				dec := gob.NewDecoder(buffer)
+				err := dec.Decode(&result)
+				if err != nil {
+					panic(err)
+				}
+				eventstore.dispatcher[result.Projection.(string)](result.Args)
+				log.Printf("Event id of %s was published from channel '%s'", result.Id, dc.Label())
+				dc.Send([]byte{})
+			}(dcMsg)
+		})
+
+	})
+
+	answer, err := eventstore.pc.CreateAnswer(nil)
+	if err != nil {
+		panic(err)
+	}
+
+	eventstore.pc.SetLocalDescription(answer)
+	desc2, err := json.Marshal(answer)
+	if err != nil {
+		panic(err)
+	}
+	go func() {
+		eventstore.OnDescription <- string(desc2)
+	}()
 }
 
 type HouseWasSold struct{}
 
-func (eventstore *EventStore) Publish(channel string, event *Event) *webrtc.DataChannel {
-	dc, err := eventstore.connection.CreateDataChannel(channel, nil)
-	if err != nil {
-		panic(err)
-	}
-	var result Event
-
-	var buffer bytes.Buffer
-	dec := gob.NewDecoder(&buffer)
-	eventstore.connection.OnICEConnectionStateChange(func(connectionState webrtc.ICEConnectionState) {
-		fmt.Printf("ICE Connection State has changed: %s\n", connectionState.String()) //nolint
-	})
-
-	eventstore.connection.OnDataChannel(func(d *webrtc.DataChannel) {
-		fmt.Printf("New DataChannel %s %d\n", d.Label(), d.ID())
-
-		dc.OnOpen(func() {
-			log.Println("Event sourcing was initialized")
-			enc := gob.NewEncoder(&buffer)
-			err := enc.Encode(event)
-			if err != nil {
-				panic(err)
-			}
-			dc.Send(buffer.Bytes())
-		})
-		dc.OnMessage(func(msg webrtc.DataChannelMessage) {
-			err := dec.Decode(&result)
-			if err != nil {
-				panic(err)
-			}
-			log.Printf("Event %d was published\n", result.Id)
-
-		})
-	})
-	return dc
-}
-
 func main() {
-	store := newEventStore()
-	event := &Event{
-		Id:         "1",
-		Projection: "HouseWasSold",
-		Args:       map[string]any{"price": 100},
+	dispatcher := Dispatcher{
+		"main.HouseWasSold": func(m map[string]any) {
+			fmt.Println(m)
+		},
 	}
-	dc := store.Publish("event", event)
+	eventstore1 := newEventStore(dispatcher)
+	eventstore2 := newEventStore(dispatcher)
 
-	state := dc.ReadyState()
-	fmt.Println(state)
-	err := dc.Send([]byte{})
-	if err != nil {
-		panic(err)
+	eventstore1.Subscriber(newEvent(
+		HouseWasSold{},
+		map[string]any{
+			"key": 1,
+		},
+	), "eventstore")
+	for {
+		select {
+		case event := <-eventstore1.OnDescription:
+			eventstore2.Publish(event)
+		case <-eventstore1.OnBye:
+		case event := <-eventstore2.OnDescription:
+			eventstore1.Publish(event)
+		case <-eventstore1.OnBye:
+		}
+
 	}
 }
