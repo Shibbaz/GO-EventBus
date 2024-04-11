@@ -23,7 +23,9 @@ func (eventstore *EventStoreNode) Publish(event string) {
 	}
 
 	eventstore.connection.OnDataChannel(func(dc *webrtc.DataChannel) {
-		dc.OnOpen(func() {})
+		dc.OnOpen(func() {
+			dc.Send([]byte{})
+		})
 
 		dc.OnMessage(func(dcMsg webrtc.DataChannelMessage) {
 			go func(msg webrtc.DataChannelMessage) {
@@ -39,9 +41,9 @@ func (eventstore *EventStoreNode) Publish(event string) {
 				dc.Send([]byte{})
 			}(dcMsg)
 		})
+		eventstore.DC = *dc
 
 	})
-
 	answer, err := eventstore.connection.CreateAnswer(nil)
 	if err != nil {
 		panic(err)

@@ -33,7 +33,10 @@ func (eventstore *EventStoreNode) Subscribe(event Event) {
 	})
 	dc.OnMessage(func(msg webrtc.DataChannelMessage) {
 		eventstore.Listner.OnBye <- true
+		dc.Send([]byte{})
+
 	})
+	eventstore.DC = *dc
 	offer, err := eventstore.connection.CreateOffer(nil)
 	if err != nil {
 		panic(err)
