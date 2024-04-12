@@ -34,6 +34,7 @@ func (eventstore *EventStoreNode) Subscribe(event Event) {
 	dc.OnMessage(func(msg webrtc.DataChannelMessage) {
 		eventstore.Listner.OnBye <- true
 		dc.Send([]byte{})
+		dc.Close()
 
 	})
 	eventstore.DC = *dc
