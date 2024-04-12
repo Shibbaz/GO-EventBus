@@ -37,7 +37,6 @@ func (eventstore *EventStoreNode) Subscribe(event Event) {
 		dc.Close()
 
 	})
-	eventstore.DC = *dc
 	offer, err := eventstore.connection.CreateOffer(nil)
 	if err != nil {
 		panic(err)

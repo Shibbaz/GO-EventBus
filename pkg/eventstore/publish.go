@@ -41,7 +41,6 @@ func (eventstore *EventStoreNode) Publish(event string) {
 				dc.Send([]byte{})
 			}(dcMsg)
 		})
-		eventstore.DC = *dc
 
 	})
 	answer, err := eventstore.connection.CreateAnswer(nil)
