@@ -1,5 +1,3 @@
 package GOEventBus
 
-import "reflect"
-
-type Dispatcher map[reflect.Type]func(EventArgs) error
+type Dispatcher map[string]func(map[string]any)
