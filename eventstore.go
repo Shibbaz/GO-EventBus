@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"sync"
-	"time"
 
 	"github.com/pion/webrtc/v2"
 )
@@ -70,7 +69,6 @@ func (eventstore *EventStore) Run(EventsSource func()) {
 	log.Println("EventStore initialized!")
 datasource:
 	{
-		time.Sleep(time.Millisecond * 1000)
 		EventsSource()
 	}
 	var mutex = sync.Mutex{}
