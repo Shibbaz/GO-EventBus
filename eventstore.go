@@ -67,11 +67,11 @@ func (eventstore *EventStore) Broadcast() error {
 
 func (eventstore *EventStore) Run(EventsSource func()) {
 	log.Println("EventStore initialized!")
+	var mutex = sync.Mutex{}
 datasource:
 	{
 		EventsSource()
 	}
-	var mutex = sync.Mutex{}
 	go func() {
 		mutex.Lock()
 		err := eventstore.Broadcast()
