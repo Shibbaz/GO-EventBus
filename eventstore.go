@@ -45,6 +45,9 @@ func NewEventStore(dispatcher *Dispatcher) *EventStore {
 	}
 }
 
+func (eventstore *EventStore) GetEvent() any {
+	return eventstore.events.Get()
+}
 func (eventstore *EventStore) Publish(event Event) {
 	eventstore.events.Put(event)
 }
