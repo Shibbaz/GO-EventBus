@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"unsafe"
 
 	. "github.com/Shibbaz/GOEventBus"
 )
@@ -12,8 +13,12 @@ type HouseWasSold struct{}
 
 func TestDispatcherFuncEventProjectionType(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) {
+		"tests.HouseWasSold": func(m map[string]any) []byte {
 			fmt.Println(m)
+
+			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
+
+			return data
 		},
 	}
 	event := NewEvent(HouseWasSold{}, map[string]any{
@@ -26,8 +31,12 @@ func TestDispatcherFuncEventProjectionType(t *testing.T) {
 
 func TestNewEventStore(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) {
+		"tests.HouseWasSold": func(m map[string]any) []byte {
 			fmt.Println(m)
+
+			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
+
+			return data
 		},
 	}
 	got := &EventStore{Dispatcher: &dispatcher}
@@ -50,8 +59,12 @@ func TestNewEvent(t *testing.T) {
 
 func TestEventStorePublish(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) {
+		"tests.HouseWasSold": func(m map[string]any) []byte {
 			fmt.Println(m)
+
+			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
+
+			return data
 		},
 	}
 	eventstore := NewEventStore(&dispatcher)
