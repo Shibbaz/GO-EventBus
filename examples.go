@@ -2,13 +2,12 @@ package GOEventBus
 
 import (
 	"fmt"
-	"unsafe"
 )
 
 func Example(args map[string]any) ([]byte, error) {
 	fmt.Println(args)
 
-	var data []byte = *(*[]byte)(unsafe.Pointer(&args))
+	var data []byte = (&Serializer{}).Serialize(args)
 
 	return data, nil
 }
