@@ -2,6 +2,8 @@ package GOEventBus
 
 import (
 	"bytes"
+	"context"
+	"database/sql"
 	"encoding/gob"
 	"encoding/json"
 	"log"
@@ -9,7 +11,7 @@ import (
 	"github.com/pion/webrtc/v2"
 )
 
-func (eventstore *EventStoreNode) Publish(event string) {
+func (eventstore *EventStoreNode) Publish(event string, db *sql.DB) {
 	var desc webrtc.SessionDescription
 	dbyte := []byte(event)
 	err := json.Unmarshal(dbyte, &desc)
@@ -36,9 +38,27 @@ func (eventstore *EventStoreNode) Publish(event string) {
 				if err != nil {
 					panic(err)
 				}
-				eventstore.dispatcher[result.Projection.(string)](result.Args)
-				log.Printf("Event id of %s was published from channel '%s'", result.Id, dc.Label())
-				dc.Send([]byte{})
+
+				data, err := eventstore.dispatcher[result.Projection.(string)](result.Args)
+				if err != nil {
+					ctx := context.Background()
+					tx, err := db.BeginTx(ctx, nil)
+					if err != nil {
+						return
+					}
+
+					_, err = tx.ExecContext(ctx, "INSERT INTO events (event_id, projection, metadata) VALUES (?, ?, ?)", result.Id, result.Projection.(string), data)
+					if err != nil {
+						return
+					}
+					if err = tx.Commit(); err != nil {
+						return
+					}
+					log.Printf("Event id of %s was published from channel '%s'", result.Id, dc.Label())
+
+					dc.Send([]byte{})
+
+				}
 			}(dcMsg)
 		})
 

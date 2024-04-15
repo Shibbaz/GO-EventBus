@@ -13,12 +13,12 @@ type HouseWasSold struct{}
 
 func TestDispatcherFuncEventProjectionType(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) []byte {
+		"tests.HouseWasSold": func(m map[string]any) ([]byte, error) {
 			fmt.Println(m)
 
 			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
 
-			return data
+			return data, nil
 		},
 	}
 	event := NewEvent(HouseWasSold{}, map[string]any{
@@ -31,16 +31,16 @@ func TestDispatcherFuncEventProjectionType(t *testing.T) {
 
 func TestNewEventStore(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) []byte {
+		"tests.HouseWasSold": func(m map[string]any) ([]byte, error) {
 			fmt.Println(m)
 
 			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
 
-			return data
+			return data, nil
 		},
 	}
 	got := &EventStore{Dispatcher: &dispatcher}
-	want := NewEventStore(&dispatcher)
+	want := NewEventStore(&dispatcher, nil)
 	if reflect.DeepEqual(got, want) {
 		t.Errorf("EventStore wants %v, got %v", got, want)
 	}
@@ -59,22 +59,22 @@ func TestNewEvent(t *testing.T) {
 
 func TestEventStorePublish(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) []byte {
+		"tests.HouseWasSold": func(m map[string]any) ([]byte, error) {
 			fmt.Println(m)
 
 			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
 
-			return data
+			return data, nil
 		},
 	}
-	eventstore := NewEventStore(&dispatcher)
+	eventstore := NewEventStore(&dispatcher, nil)
 	args := map[string]any{
 		"price": 100,
 	}
 	wanted := NewEvent(HouseWasSold{}, args)
 	eventstore.Publish(wanted)
-	got, err := eventstore.GetEvent().(Event)
-	if err != true {
+	got, valid := eventstore.GetEvent().(Event)
+	if valid != true {
 		t.Errorf("Event was not published, got %v, expected %v", got, wanted)
 
 	}

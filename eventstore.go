@@ -1,6 +1,7 @@
 package GOEventBus
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"sync"
@@ -20,6 +21,7 @@ type EventStoreNode struct {
 }
 
 type EventStore struct {
+	DB         *sql.DB
 	Dispatcher *Dispatcher
 	Done       chan bool
 	events     sync.Pool
@@ -29,10 +31,11 @@ type EventStore struct {
 	mutex      sync.Mutex
 }
 
-func NewEventStore(dispatcher *Dispatcher) *EventStore {
+func NewEventStore(dispatcher *Dispatcher, db *sql.DB) *EventStore {
 	left := NewEventStoreNode(*dispatcher)
 	right := NewEventStoreNode(*dispatcher)
 	return &EventStore{
+		DB:         db,
 		left:       *left,
 		right:      *right,
 		Dispatcher: dispatcher,
@@ -62,9 +65,9 @@ func (eventstore *EventStore) Broadcast() error {
 		}
 		eventstore.left.Subscribe(curr.(Event))
 		event := <-eventstore.left.Listner.OnDescription
-		eventstore.right.Publish(event)
+		eventstore.right.Publish(event, eventstore.DB)
 		event2 := <-eventstore.right.Listner.OnDescription
-		eventstore.left.Publish(event2)
+		eventstore.left.Publish(event2, eventstore.DB)
 	}
 }
 

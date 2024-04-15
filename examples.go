@@ -5,12 +5,12 @@ import (
 	"unsafe"
 )
 
-func Example(args map[string]any) []byte {
+func Example(args map[string]any) ([]byte, error) {
 	fmt.Println(args)
 
 	var data []byte = *(*[]byte)(unsafe.Pointer(&args))
 
-	return data
+	return data, nil
 }
 
 var ExampleDispatcher = Dispatcher{
