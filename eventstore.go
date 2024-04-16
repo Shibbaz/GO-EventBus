@@ -14,7 +14,6 @@ type EventStoreListener struct {
 	OnBye         chan bool
 }
 type EventStoreNode struct {
-	DB         *sql.DB
 	connection *webrtc.PeerConnection
 	dispatcher Dispatcher
 	Listner    EventStoreListener
@@ -22,7 +21,6 @@ type EventStoreNode struct {
 }
 
 type EventStore struct {
-	DB         *sql.DB
 	Dispatcher *Dispatcher
 	Done       chan bool
 	events     sync.Pool
@@ -58,7 +56,7 @@ func NewEventStore(dispatcher *Dispatcher) *EventStore {
 	}
 }
 func (eventstore *EventStore) Query(projection string) map[string](map[string]any) {
-	rows, err := eventstore.DB.Query("SELECT event_id, metadata FROM events where projection = %s;", projection)
+	rows, err := EventStoreDB.Query("SELECT event_id, metadata FROM events where projection = %s;", projection)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -87,7 +85,7 @@ func (eventstore *EventStore) Setup(dbname string) {
 		log.Fatal(err)
 	}
 
-	_, err = eventstore.DB.Exec("CREATE TABLE IF NOT EXISTS events(event_id text primary key, projection text, metadata bytea)")
+	_, err = EventStoreDB.Exec("CREATE TABLE IF NOT EXISTS events(event_id text primary key, projection text, metadata bytea)")
 
 	if err != nil {
 		log.Fatal(err)
