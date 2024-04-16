@@ -57,7 +57,30 @@ func NewEventStore(dispatcher *Dispatcher) *EventStore {
 		},
 	}
 }
+func (eventstore *EventStore) Query(projection string) map[string](map[string]any) {
+	rows, err := eventstore.DB.Query("SELECT event_id, metadata FROM events where projection = %s;", projection)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	data := map[string](map[string]any){}
+	for rows.Next() {
+		var metadata []byte
+		var event_id string
+		if err := rows.Scan(&metadata); err != nil {
+			log.Fatal(err)
+		}
+		if err := rows.Scan(&event_id); err != nil {
+			log.Fatal(err)
+		}
+		data[event_id] = NewSerializer().Deserialize(metadata)
 
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return data
+}
 func (eventstore *EventStore) Setup(dbname string) {
 	_, err := EventStoreDB.Exec("create database " + dbname)
 	if err != nil {
