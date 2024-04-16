@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
-	"unsafe"
 
 	. "github.com/Shibbaz/GOEventBus"
 )
@@ -13,12 +12,10 @@ type HouseWasSold struct{}
 
 func TestDispatcherFuncEventProjectionType(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) ([]byte, error) {
+		"tests.HouseWasSold": func(m *map[string]any) (map[string]any, error) {
 			fmt.Println(m)
 
-			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
-
-			return data, nil
+			return *m, nil
 		},
 	}
 	event := NewEvent(HouseWasSold{}, map[string]any{
@@ -31,16 +28,14 @@ func TestDispatcherFuncEventProjectionType(t *testing.T) {
 
 func TestNewEventStore(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) ([]byte, error) {
+		"tests.HouseWasSold": func(m *map[string]any) (map[string]any, error) {
 			fmt.Println(m)
 
-			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
-
-			return data, nil
+			return *m, nil
 		},
 	}
 	got := &EventStore{Dispatcher: &dispatcher}
-	want := NewEventStore(&dispatcher, nil)
+	want := NewEventStore(&dispatcher)
 	if reflect.DeepEqual(got, want) {
 		t.Errorf("EventStore wants %v, got %v", got, want)
 	}
@@ -59,15 +54,13 @@ func TestNewEvent(t *testing.T) {
 
 func TestEventStorePublish(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) ([]byte, error) {
+		"tests.HouseWasSold": func(m *map[string]any) (map[string]any, error) {
 			fmt.Println(m)
 
-			var data []byte = *(*[]byte)(unsafe.Pointer(&m))
-
-			return data, nil
+			return *m, nil
 		},
 	}
-	eventstore := NewEventStore(&dispatcher, nil)
+	eventstore := NewEventStore(&dispatcher)
 	args := map[string]any{
 		"price": 100,
 	}

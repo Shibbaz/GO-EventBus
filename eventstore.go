@@ -14,6 +14,7 @@ type EventStoreListener struct {
 	OnBye         chan bool
 }
 type EventStoreNode struct {
+	DB         *sql.DB
 	connection *webrtc.PeerConnection
 	dispatcher Dispatcher
 	Listner    EventStoreListener
@@ -31,11 +32,20 @@ type EventStore struct {
 	mutex      sync.Mutex
 }
 
-func NewEventStore(dispatcher *Dispatcher, db *sql.DB) *EventStore {
+var EventStoreDB *sql.DB
+
+func SetEventStoreDB(psqlInfo string) {
+	var err error
+	EventStoreDB, err = sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func NewEventStore(dispatcher *Dispatcher) *EventStore {
 	left := NewEventStoreNode(*dispatcher)
 	right := NewEventStoreNode(*dispatcher)
 	return &EventStore{
-		DB:         db,
 		left:       *left,
 		right:      *right,
 		Dispatcher: dispatcher,
@@ -49,7 +59,7 @@ func NewEventStore(dispatcher *Dispatcher, db *sql.DB) *EventStore {
 }
 
 func (eventstore *EventStore) Setup(dbname string) {
-	_, err := eventstore.DB.Exec("create database " + dbname)
+	_, err := EventStoreDB.Exec("create database " + dbname)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -79,9 +89,9 @@ func (eventstore *EventStore) Broadcast() error {
 		}
 		eventstore.left.Subscribe(curr.(Event))
 		event := <-eventstore.left.Listner.OnDescription
-		eventstore.right.Publish(event, eventstore.DB)
+		eventstore.right.Publish(event)
 		event2 := <-eventstore.right.Listner.OnDescription
-		eventstore.left.Publish(event2, eventstore.DB)
+		eventstore.left.Publish(event2)
 	}
 }
 

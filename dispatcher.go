@@ -1,3 +1,3 @@
 package GOEventBus
 
-type Dispatcher map[string]func(map[string]any) ([]byte, error)
+type Dispatcher map[string]func(*map[string]any) (map[string]interface{}, error)

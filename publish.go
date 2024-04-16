@@ -3,7 +3,6 @@ package GOEventBus
 import (
 	"bytes"
 	"context"
-	"database/sql"
 	"encoding/gob"
 	"encoding/json"
 	"log"
@@ -11,7 +10,7 @@ import (
 	"github.com/pion/webrtc/v2"
 )
 
-func (eventstore *EventStoreNode) Publish(event string, db *sql.DB) {
+func (eventstore *EventStoreNode) Publish(event string) {
 	var desc webrtc.SessionDescription
 	dbyte := []byte(event)
 	err := json.Unmarshal(dbyte, &desc)
@@ -38,16 +37,22 @@ func (eventstore *EventStoreNode) Publish(event string, db *sql.DB) {
 				if err != nil {
 					panic(err)
 				}
-
-				data, err := eventstore.dispatcher[result.Projection.(string)](result.Args)
+				data, err := eventstore.dispatcher[result.Projection.(string)](&result.Args)
 				if err != nil {
+					panic(err)
+				}
+				serialized := NewSerializer().Serialize(data)
+
+				if serialized != nil {
+
 					ctx := context.Background()
-					tx, err := db.BeginTx(ctx, nil)
+					tx, err := EventStoreDB.BeginTx(ctx, nil)
 					if err != nil {
 						return
 					}
 
-					_, err = tx.ExecContext(ctx, "INSERT INTO events (event_id, projection, metadata) VALUES (?, ?, ?)", result.Id, result.Projection.(string), data)
+					_, err = EventStoreDB.ExecContext(ctx, "INSERT INTO events (event_id, projection, metadata) VALUES ($1, $2, $3)", result.Id, result.Projection.(string), serialized)
+
 					if err != nil {
 						return
 					}
@@ -55,10 +60,10 @@ func (eventstore *EventStoreNode) Publish(event string, db *sql.DB) {
 						return
 					}
 					log.Printf("Event id of %s was published from channel '%s'", result.Id, dc.Label())
-
 					dc.Send([]byte{})
 
 				}
+
 			}(dcMsg)
 		})
 

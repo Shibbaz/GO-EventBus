@@ -4,12 +4,10 @@ import (
 	"fmt"
 )
 
-func Example(args map[string]any) ([]byte, error) {
+func Example(args *map[string]any) (map[string]any, error) {
 	fmt.Println(args)
 
-	var data []byte = (&Serializer{}).Serialize(args)
-
-	return data, nil
+	return *args, nil
 }
 
 var ExampleDispatcher = Dispatcher{
