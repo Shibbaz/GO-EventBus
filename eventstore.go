@@ -48,6 +48,20 @@ func NewEventStore(dispatcher *Dispatcher, db *sql.DB) *EventStore {
 	}
 }
 
+func (eventstore *EventStore) Setup(dbname string) {
+	_, err := eventstore.DB.Exec("create database " + dbname)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = eventstore.DB.Exec("CREATE TABLE IF NOT EXISTS events(event_id text primary key, projection text, metadata bytea)")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+
 func (eventstore *EventStore) GetEvent() any {
 	return eventstore.events.Get()
 }
