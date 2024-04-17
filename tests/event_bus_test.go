@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	. "github.com/Shibbaz/GOEventBus"
+	_ "github.com/xhd2015/xgo/runtime/trace"
 )
 
 type HouseWasSold struct{}
