@@ -12,8 +12,10 @@ type HouseWasSold struct{}
 
 func TestDispatcherFuncEventProjectionType(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) {
+		"tests.HouseWasSold": func(m *map[string]any) (map[string]any, error) {
 			fmt.Println(m)
+
+			return *m, nil
 		},
 	}
 	event := NewEvent(HouseWasSold{}, map[string]any{
@@ -26,8 +28,10 @@ func TestDispatcherFuncEventProjectionType(t *testing.T) {
 
 func TestNewEventStore(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) {
+		"tests.HouseWasSold": func(m *map[string]any) (map[string]any, error) {
 			fmt.Println(m)
+
+			return *m, nil
 		},
 	}
 	got := &EventStore{Dispatcher: &dispatcher}
@@ -50,8 +54,10 @@ func TestNewEvent(t *testing.T) {
 
 func TestEventStorePublish(t *testing.T) {
 	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m map[string]any) {
+		"tests.HouseWasSold": func(m *map[string]any) (map[string]any, error) {
 			fmt.Println(m)
+
+			return *m, nil
 		},
 	}
 	eventstore := NewEventStore(&dispatcher)
@@ -60,8 +66,8 @@ func TestEventStorePublish(t *testing.T) {
 	}
 	wanted := NewEvent(HouseWasSold{}, args)
 	eventstore.Publish(wanted)
-	got, err := eventstore.GetEvent().(Event)
-	if err != true {
+	got, valid := eventstore.GetEvent().(Event)
+	if valid != true {
 		t.Errorf("Event was not published, got %v, expected %v", got, wanted)
 
 	}

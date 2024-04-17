@@ -2,6 +2,7 @@ package GOEventBus
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
 	"encoding/json"
 	"log"
@@ -36,9 +37,32 @@ func (eventstore *EventStoreNode) Publish(event string) {
 				if err != nil {
 					panic(err)
 				}
-				eventstore.dispatcher[result.Projection.(string)](result.Args)
-				log.Printf("Event id of %s was published from channel '%s'", result.Id, dc.Label())
-				dc.Send([]byte{})
+				data, err := eventstore.dispatcher[result.Projection.(string)](&result.Args)
+				if err != nil {
+					panic(err)
+				}
+				serialized := NewSerializer().Serialize(data)
+
+				if serialized != nil {
+
+					ctx := context.Background()
+					tx, err := EventStoreDB.BeginTx(ctx, nil)
+					if err != nil {
+						return
+					}
+
+					_, err = EventStoreDB.ExecContext(ctx, "INSERT INTO events (event_id, projection, metadata) VALUES ($1, $2, $3)", result.Id, result.Projection.(string), serialized)
+
+					if err != nil {
+						return
+					}
+					if err = tx.Commit(); err != nil {
+						return
+					}
+					log.Printf("Event id of %s was published from channel '%s'", result.Id, dc.Label())
+					dc.Send([]byte{})
+				}
+
 			}(dcMsg)
 		})
 

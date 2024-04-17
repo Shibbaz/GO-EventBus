@@ -1,6 +1,7 @@
 package GOEventBus
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"sync"
@@ -29,6 +30,16 @@ type EventStore struct {
 	mutex      sync.Mutex
 }
 
+var EventStoreDB *sql.DB
+
+func SetEventStoreDB(psqlInfo string) {
+	var err error
+	EventStoreDB, err = sql.Open("postgres", psqlInfo)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func NewEventStore(dispatcher *Dispatcher) *EventStore {
 	left := NewEventStoreNode(*dispatcher)
 	right := NewEventStoreNode(*dispatcher)
@@ -43,6 +54,43 @@ func NewEventStore(dispatcher *Dispatcher) *EventStore {
 			},
 		},
 	}
+}
+func (eventstore *EventStore) Query(projection string) map[string](map[string]any) {
+	rows, err := EventStoreDB.Query("SELECT event_id, metadata FROM events where projection = %s;", projection)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	data := map[string](map[string]any){}
+	for rows.Next() {
+		var metadata []byte
+		var event_id string
+		if err := rows.Scan(&metadata); err != nil {
+			log.Fatal(err)
+		}
+		if err := rows.Scan(&event_id); err != nil {
+			log.Fatal(err)
+		}
+		data[event_id] = NewSerializer().Deserialize(metadata)
+
+	}
+	if err := rows.Err(); err != nil {
+		log.Fatal(err)
+	}
+	return data
+}
+func (eventstore *EventStore) Setup(dbname string) {
+	_, err := EventStoreDB.Exec("create database " + dbname)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	_, err = EventStoreDB.Exec("CREATE TABLE IF NOT EXISTS events(event_id text primary key, projection text, metadata bytea)")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func (eventstore *EventStore) GetEvent() any {
@@ -68,21 +116,17 @@ func (eventstore *EventStore) Broadcast() error {
 	}
 }
 
-func (eventstore *EventStore) Run(EventsSource func()) {
-	log.Println("EventStore initialized!")
+func (eventstore *EventStore) Run() {
 	var mutex = sync.Mutex{}
+
 datasource:
-	{
-		EventsSource()
+
+	mutex.Lock()
+	err := eventstore.Broadcast()
+	if err != nil {
+		return
 	}
-	go func() {
-		mutex.Lock()
-		err := eventstore.Broadcast()
-		if err != nil {
-			return
-		}
-		mutex.Unlock()
-	}()
+	mutex.Unlock()
 	goto datasource
 
 }
