@@ -37,14 +37,13 @@ func main() {
 		},
 	}
 	eventstore := gbus.NewEventStore(dispatcher)
-	eventstore.Run(func() {
-		eventstore.Publish(gbus.NewEvent(
-			HouseWasSold{},
-			map[string]any{
-				"price": 1 * 100,
-			},
-		))
-	})
+	eventstore.Publish(gbus.NewEvent(
+				HouseWasSold{},
+				map[string]any{
+					"price": 1 * 100,
+				},
+			))
+	eventstore.Run()
 }
 ```
 
