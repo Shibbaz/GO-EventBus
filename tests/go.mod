@@ -6,7 +6,7 @@ replace github.com/Shibbaz/GOEventBus => ../
 
 require (
 	github.com/Shibbaz/GOEventBus v0.0.0-00010101000000-000000000000
-	github.com/xhd2015/xgo/runtime v1.0.24
+	github.com/xhd2015/xgo/runtime v1.0.25
 )
 
 require (

@@ -6,13 +6,12 @@ import (
 	"testing"
 
 	. "github.com/Shibbaz/GOEventBus"
-	"github.com/xhd2015/xgo/runtime/trace"
+	_ "github.com/xhd2015/xgo/runtime/trace"
 )
 
 type HouseWasSold struct{}
 
 func TestDispatcherFuncEventProjectionType(t *testing.T) {
-	defer trace.Begin()()
 	dispatcher := Dispatcher{
 		"tests.HouseWasSold": func(m map[string]any) {
 			fmt.Println(m)
@@ -51,7 +50,6 @@ func TestNewEvent(t *testing.T) {
 }
 
 func TestEventStorePublish(t *testing.T) {
-	defer trace.Begin()()
 	dispatcher := Dispatcher{
 		"tests.HouseWasSold": func(m map[string]any) {
 			fmt.Println(m)

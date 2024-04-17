@@ -74,8 +74,8 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.6.1 h1:hDPOHmpOpP40lSULcqw7IrRb/u7w6RpDC9399XyoNd0=
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/xhd2015/xgo/runtime v1.0.24 h1:G03it6wqX7hDS7KoX+XJjkD87YHX7GeHFmiXACaUbQE=
-github.com/xhd2015/xgo/runtime v1.0.24/go.mod h1:9GBQ2SzJCzpD3T+HRN+2C0TUOGv7qIz4s0mad1xJ8Jo=
+github.com/xhd2015/xgo/runtime v1.0.25 h1:gDO7lUPyi8uLpXvYKmfSlJ1bxHHupsWq8QMMjnUIRN4=
+github.com/xhd2015/xgo/runtime v1.0.25/go.mod h1:9GBQ2SzJCzpD3T+HRN+2C0TUOGv7qIz4s0mad1xJ8Jo=
 golang.org/x/crypto v0.0.0-20190228161510-8dd112bcdc25/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20200602180216-279210d13fed/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=

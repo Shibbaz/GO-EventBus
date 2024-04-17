@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// Event represents a unique happening of something
 type Event struct {
 	Id         string
 	Projection any
