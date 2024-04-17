@@ -10,6 +10,7 @@ import (
 	"github.com/pion/webrtc/v2"
 )
 
+// Usecase of datachannel, event is encoded into bytes and send to another peer (look into Publish func)
 func (eventstore *EventStoreNode) Subscribe(event Event) {
 	ordered := false
 	maxRetransmits := uint16(0)

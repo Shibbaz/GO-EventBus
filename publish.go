@@ -10,6 +10,8 @@ import (
 	"github.com/pion/webrtc/v2"
 )
 
+// Sending bytes over datachannels to publish events and send it in database
+// Serializing data before inserting it to database
 func (eventstore *EventStoreNode) Publish(event string) {
 	var desc webrtc.SessionDescription
 	dbyte := []byte(event)

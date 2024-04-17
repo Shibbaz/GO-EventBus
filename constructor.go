@@ -4,6 +4,7 @@ import (
 	"github.com/pion/webrtc/v2"
 )
 
+// EventStoreNode constructor
 func NewEventStoreNode(dispatcher Dispatcher) *EventStoreNode {
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{},
