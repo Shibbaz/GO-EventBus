@@ -61,7 +61,6 @@ func (eventstore *EventStoreNode) Publish(event string) {
 					}
 					log.Printf("Event id of %s was published from channel '%s'", result.Id, dc.Label())
 					dc.Send([]byte{})
-
 				}
 
 			}(dcMsg)
