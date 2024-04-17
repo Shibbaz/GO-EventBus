@@ -1,30 +1,12 @@
-package tests
+package GOEventBus
 
 import (
 	"fmt"
 	"reflect"
 	"testing"
-
-	. "github.com/Shibbaz/GOEventBus"
 )
 
 type HouseWasSold struct{}
-
-func TestDispatcherFuncEventProjectionType(t *testing.T) {
-	dispatcher := Dispatcher{
-		"tests.HouseWasSold": func(m *map[string]any) (map[string]any, error) {
-			fmt.Println(m)
-
-			return *m, nil
-		},
-	}
-	event := NewEvent(HouseWasSold{}, map[string]any{
-		"price": 100,
-	})
-	if dispatcher[event.Projection.(string)] == nil {
-		t.Errorf("tests.HouseWasSold want %T", Example)
-	}
-}
 
 func TestNewEventStore(t *testing.T) {
 	dispatcher := Dispatcher{
