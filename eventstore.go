@@ -32,6 +32,7 @@ type EventStore struct {
 
 var EventStoreDB *sql.DB
 
+// Setting database connection
 func SetEventStoreDB(psqlInfo string) {
 	var err error
 	EventStoreDB, err = sql.Open("postgres", psqlInfo)
@@ -40,6 +41,7 @@ func SetEventStoreDB(psqlInfo string) {
 	}
 }
 
+// Eventstore constructor
 func NewEventStore(dispatcher *Dispatcher) *EventStore {
 	left := NewEventStoreNode(*dispatcher)
 	right := NewEventStoreNode(*dispatcher)
@@ -55,6 +57,8 @@ func NewEventStore(dispatcher *Dispatcher) *EventStore {
 		},
 	}
 }
+
+// querying database for events of projections'
 func (eventstore *EventStore) Query(projection string) map[string](map[string]any) {
 	rows, err := EventStoreDB.Query("SELECT event_id, metadata FROM events where projection = %s;", projection)
 	if err != nil {
@@ -79,6 +83,8 @@ func (eventstore *EventStore) Query(projection string) map[string](map[string]an
 	}
 	return data
 }
+
+// Setting up database and creating table
 func (eventstore *EventStore) Setup(dbname string) {
 	_, err := EventStoreDB.Exec("create database " + dbname)
 	if err != nil {
@@ -93,13 +99,17 @@ func (eventstore *EventStore) Setup(dbname string) {
 
 }
 
+// Get event from sync.Pool
 func (eventstore *EventStore) GetEvent() any {
 	return eventstore.events.Get()
 }
+
+// Subscribing event
 func (eventstore *EventStore) Publish(event Event) {
 	eventstore.events.Put(event)
 }
 
+// Broadcasts every published event
 func (eventstore *EventStore) Broadcast() error {
 	eventstore.mutex.Lock()
 	defer eventstore.mutex.Unlock()

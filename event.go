@@ -12,6 +12,7 @@ type Event struct {
 	Args       map[string]any
 }
 
+// Event constructor
 func NewEvent(projection any, args map[string]any) Event {
 	id := uuid.New().String()
 	return Event{
