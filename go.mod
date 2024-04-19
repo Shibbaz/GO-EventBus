@@ -9,8 +9,6 @@ require (
 
 require (
 	github.com/cheekybits/genny v1.0.0 // indirect
-	github.com/julienschmidt/httprouter v1.3.0 // indirect
-	github.com/lib/pq v1.10.9 // indirect
 	github.com/lucas-clemente/quic-go v0.7.1-0.20190401152353-907071221cf9 // indirect
 	github.com/marten-seemann/qtls v0.2.3 // indirect
 	github.com/pion/datachannel v1.4.21 // indirect
@@ -31,7 +29,7 @@ require (
 	github.com/pion/turn/v2 v2.0.4 // indirect
 	github.com/pion/udp v0.1.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
-	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sys v0.15.0 // indirect
+	golang.org/x/crypto v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
 )
