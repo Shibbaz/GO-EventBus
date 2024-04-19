@@ -9,6 +9,8 @@ require (
 
 require (
 	github.com/cheekybits/genny v1.0.0 // indirect
+	github.com/julienschmidt/httprouter v1.3.0 // indirect
+	github.com/lib/pq v1.10.9 // indirect
 	github.com/lucas-clemente/quic-go v0.7.1-0.20190401152353-907071221cf9 // indirect
 	github.com/marten-seemann/qtls v0.2.3 // indirect
 	github.com/pion/datachannel v1.4.21 // indirect
