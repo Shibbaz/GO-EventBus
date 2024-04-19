@@ -6,11 +6,9 @@ import (
 
 // EventStoreNode constructor
 func NewEventStoreNode(dispatcher Dispatcher) *EventStoreNode {
-	config := webrtc.Configuration{
+	connection, err := webrtc.NewPeerConnection(webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{},
-	}
-
-	connection, err := webrtc.NewPeerConnection(config)
+	})
 	if err != nil {
 		panic(err)
 	}
