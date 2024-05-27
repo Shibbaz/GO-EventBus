@@ -1,5 +1,5 @@
-# GOEventBus
-> Simple eventbus lib in Go<br /><br />
+# UniverseEventSource
+> Simple event source system<br /><br />
 
 This project lets you publish and subscribe events easily.
 
